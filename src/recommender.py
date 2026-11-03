@@ -5,9 +5,9 @@ from dataclasses import asdict, dataclass
 
 # How much each feature counts toward the final score
 WEIGHTS = {
-    "energy": 2.0,
+    "energy": 4.0,
     "mood": 1.5,
-    "genre": 1.0,
+    "genre": 0.5,
     "valence": 1.0,
     "acousticness": 0.5,
 }

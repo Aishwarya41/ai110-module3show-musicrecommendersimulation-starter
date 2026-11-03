@@ -30,15 +30,15 @@ Every song is scored against the user's profile, then the songs are ranked by sc
 
 | Feature | Weight | How it scores |
 |---|---|---|
-| Energy | 2.0 | Closeness to the target, from 0 to 1 |
+| Energy | 4.0 | Closeness to the target, from 0 to 1 |
 | Mood | 1.5 | Exact match is 1, otherwise 0 |
-| Genre | 1.0 | Exact match is 1, otherwise 0 |
+| Genre | 0.5 | Exact match is 1, otherwise 0 |
 | Valence | 1.0 | Closeness to the target, from 0 to 1 |
 | Acousticness | 0.5 | Closeness to the target, from 0 to 1 |
 
 - **Closeness** uses a Gaussian curve: `exp(-(song - target)^2 / (2 * sigma^2))`. A perfect match scores 1.0, and the score falls smoothly as the song moves away from the target. A song that is too high scores as badly as one that is too low. Sigma is 0.15 for energy, 0.20 for valence, and 0.25 for acousticness.
 - **Final score** = `sum(weight * similarity) / sum(weights)`, so it falls between 0 and 1. Features the user gave no preference for are left out of both sums.
-- **Why these weights:** mood and energy describe how a song feels, and genre is a coarse label. With only 28 songs and mostly one or two per genre, a heavy genre weight (such as +2.0) would act as a filter and bury good cross-genre matches. So mood counts 1.5x genre, and energy counts 2x genre.
+- **Why these weights:** mood and energy describe how a song feels, and genre is a coarse label. With only 28 songs and mostly one or two per genre, a heavy genre weight (such as +2.0) would act as a filter and bury good cross-genre matches. So mood counts 3x genre, and energy counts 8x genre.
 - **Each recommendation** comes with the reasons it scored well, such as "mood matches (chill)" or "energy 0.38 is close to target 0.40".
 
 ### Expected Biases
@@ -87,38 +87,153 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Output of `python3 -m src.main` for a late-night study listener (genre=lofi, mood=chill, energy=0.40, valence=0.60, acousticness=0.75):
+Output of `python3 -m src.main`, which runs the recommender once per profile in `PROFILES` ([src/main.py](src/main.py)) and prints the top 5. The first three are standard profiles; the rest are adversarial edge cases. Weights: energy 4.0, mood 1.5, genre 0.5, valence 1.0, acousticness 0.5.
+
+### High-Energy Pop
 
 ```text
-Top recommendations:
-
-Rainy Window Beats - Score: 0.99
-Because: genre match (lofi) (+1.0); mood match (chill) (+1.5); energy 0.38 is close to target 0.40 (+2.0 of 2.0); valence 0.58 is close to target 0.60 (+1.0 of 1.0); acousticness 0.82 is close to target 0.75 (+0.5 of 0.5)
-
-Midnight Coding - Score: 0.99
-Because: genre match (lofi) (+1.0); mood match (chill) (+1.5); energy 0.42 is close to target 0.40 (+2.0 of 2.0); valence 0.56 is close to target 0.60 (+1.0 of 1.0); acousticness 0.71 is close to target 0.75 (+0.5 of 0.5)
-
-Library Rain - Score: 0.97
-Because: genre match (lofi) (+1.0); mood match (chill) (+1.5); energy 0.35 is close to target 0.40 (+1.9 of 2.0); valence 0.60 is close to target 0.60 (+1.0 of 1.0); acousticness 0.86 is close to target 0.75 (+0.5 of 0.5)
-
-Focus Flow - Score: 0.75
-Because: genre match (lofi) (+1.0); energy 0.40 is close to target 0.40 (+2.0 of 2.0); valence 0.59 is close to target 0.60 (+1.0 of 1.0); acousticness 0.78 is close to target 0.75 (+0.5 of 0.5)
-
-Late Night Notes - Score: 0.74
-Because: genre match (lofi) (+1.0); energy 0.43 is close to target 0.40 (+2.0 of 2.0); valence 0.55 is close to target 0.60 (+1.0 of 1.0); acousticness 0.74 is close to target 0.75 (+0.5 of 0.5)
+Sunrise City (pop/happy) - Score: 0.93
+  Because: genre match (pop) (+0.5); mood match (happy) (+1.5); energy 0.82 is close to target 0.90 (+3.5 of 4.0); valence 0.84 is close to target 0.85 (+1.0 of 1.0); acousticness 0.18 is close to target 0.15 (+0.5 of 0.5)
+Gloss Pop Heart (pop/happy) - Score: 0.89
+  Because: genre match (pop) (+0.5); mood match (happy) (+1.5); energy 0.80 is close to target 0.90 (+3.2 of 4.0); valence 0.86 is close to target 0.85 (+1.0 of 1.0); acousticness 0.20 is close to target 0.15 (+0.5 of 0.5)
+Gym Hero (pop/intense) - Score: 0.77
+  Because: genre match (pop) (+0.5); energy 0.93 is close to target 0.90 (+3.9 of 4.0); valence 0.77 is close to target 0.85 (+0.9 of 1.0); acousticness 0.05 is close to target 0.15 (+0.5 of 0.5)
+Rooftop Lights (indie pop/happy) - Score: 0.72
+  Because: mood match (happy) (+1.5); energy 0.76 is close to target 0.90 (+2.6 of 4.0); valence 0.81 is close to target 0.85 (+1.0 of 1.0); acousticness 0.35 is close to target 0.15 (+0.4 of 0.5)
+Neon Pulse Festival (edm/euphoric) - Score: 0.70
+  Because: energy 0.95 is close to target 0.90 (+3.8 of 4.0); valence 0.88 is close to target 0.85 (+1.0 of 1.0); acousticness 0.04 is close to target 0.15 (+0.5 of 0.5)
 ```
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
+### Chill Lofi
+
+```text
+Rainy Window Beats (lofi/chill) - Score: 0.99
+  Because: genre match (lofi) (+0.5); mood match (chill) (+1.5); energy 0.38 is close to target 0.40 (+4.0 of 4.0); valence 0.58 is close to target 0.60 (+1.0 of 1.0); acousticness 0.82 is close to target 0.75 (+0.5 of 0.5)
+Midnight Coding (lofi/chill) - Score: 0.99
+  Because: genre match (lofi) (+0.5); mood match (chill) (+1.5); energy 0.42 is close to target 0.40 (+4.0 of 4.0); valence 0.56 is close to target 0.60 (+1.0 of 1.0); acousticness 0.71 is close to target 0.75 (+0.5 of 0.5)
+Library Rain (lofi/chill) - Score: 0.97
+  Because: genre match (lofi) (+0.5); mood match (chill) (+1.5); energy 0.35 is close to target 0.40 (+3.8 of 4.0); valence 0.60 is close to target 0.60 (+1.0 of 1.0); acousticness 0.86 is close to target 0.75 (+0.5 of 0.5)
+Focus Flow (lofi/focused) - Score: 0.80
+  Because: genre match (lofi) (+0.5); energy 0.40 is close to target 0.40 (+4.0 of 4.0); valence 0.59 is close to target 0.60 (+1.0 of 1.0); acousticness 0.78 is close to target 0.75 (+0.5 of 0.5)
+Late Night Notes (lofi/focused) - Score: 0.79
+  Because: genre match (lofi) (+0.5); energy 0.43 is close to target 0.40 (+3.9 of 4.0); valence 0.55 is close to target 0.60 (+1.0 of 1.0); acousticness 0.74 is close to target 0.75 (+0.5 of 0.5)
+```
+
+### Deep Intense Rock
+
+```text
+Storm Runner (rock/intense) - Score: 0.99
+  Because: genre match (rock) (+0.5); mood match (intense) (+1.5); energy 0.91 is close to target 0.92 (+4.0 of 4.0); valence 0.48 is close to target 0.40 (+0.9 of 1.0); acousticness 0.10 is close to target 0.08 (+0.5 of 0.5)
+Thunder Road Burnout (rock/intense) - Score: 0.97
+  Because: genre match (rock) (+0.5); mood match (intense) (+1.5); energy 0.89 is close to target 0.92 (+3.9 of 4.0); valence 0.52 is close to target 0.40 (+0.8 of 1.0); acousticness 0.12 is close to target 0.08 (+0.5 of 0.5)
+Gym Hero (pop/intense) - Score: 0.82
+  Because: mood match (intense) (+1.5); energy 0.93 is close to target 0.92 (+4.0 of 4.0); acousticness 0.05 is close to target 0.08 (+0.5 of 0.5)
+Broken Amp (rock/angry) - Score: 0.78
+  Because: genre match (rock) (+0.5); energy 0.94 is close to target 0.92 (+4.0 of 4.0); valence 0.30 is close to target 0.40 (+0.9 of 1.0); acousticness 0.07 is close to target 0.08 (+0.5 of 0.5)
+Iron Tide (metal/angry) - Score: 0.67
+  Because: energy 0.97 is close to target 0.92 (+3.8 of 4.0); valence 0.25 is close to target 0.40 (+0.8 of 1.0); acousticness 0.03 is close to target 0.08 (+0.5 of 0.5)
+```
+
+### Sad but Hyper
+
+```text
+Broken Amp (rock/angry) - Score: 0.63
+  Because: energy 0.94 is close to target 0.90 (+3.9 of 4.0); valence 0.30 is close to target 0.15 (+0.8 of 1.0)
+Iron Tide (metal/angry) - Score: 0.61
+  Because: energy 0.97 is close to target 0.90 (+3.6 of 4.0); valence 0.25 is close to target 0.15 (+0.9 of 1.0)
+Gym Hero (pop/intense) - Score: 0.60
+  Because: genre match (pop) (+0.5); energy 0.93 is close to target 0.90 (+3.9 of 4.0)
+Storm Runner (rock/intense) - Score: 0.58
+  Because: energy 0.91 is close to target 0.90 (+4.0 of 4.0)
+Thunder Road Burnout (rock/intense) - Score: 0.58
+  Because: energy 0.89 is close to target 0.90 (+4.0 of 4.0)
+```
+
+### Lofi Genre, Metal Everything Else
+
+```text
+Broken Amp (rock/angry) - Score: 0.93
+  Because: mood match (angry) (+1.5); energy 0.94 is close to target 0.95 (+4.0 of 4.0); valence 0.30 is close to target 0.30 (+1.0 of 1.0); acousticness 0.07 is close to target 0.05 (+0.5 of 0.5)
+Iron Tide (metal/angry) - Score: 0.92
+  Because: mood match (angry) (+1.5); energy 0.97 is close to target 0.95 (+4.0 of 4.0); valence 0.25 is close to target 0.30 (+1.0 of 1.0); acousticness 0.03 is close to target 0.05 (+0.5 of 0.5)
+Storm Runner (rock/intense) - Score: 0.67
+  Because: energy 0.91 is close to target 0.95 (+3.9 of 4.0); valence 0.48 is close to target 0.30 (+0.7 of 1.0); acousticness 0.10 is close to target 0.05 (+0.5 of 0.5)
+Thunder Road Burnout (rock/intense) - Score: 0.63
+  Because: energy 0.89 is close to target 0.95 (+3.7 of 4.0); acousticness 0.12 is close to target 0.05 (+0.5 of 0.5)
+Gym Hero (pop/intense) - Score: 0.60
+  Because: energy 0.93 is close to target 0.95 (+4.0 of 4.0); acousticness 0.05 is close to target 0.05 (+0.5 of 0.5)
+```
+
+### Loud Unplugged
+
+```text
+Storm Runner (rock/intense) - Score: 0.65
+  Because: energy 0.91 is close to target 0.95 (+3.9 of 4.0); valence 0.48 is close to target 0.50 (+1.0 of 1.0)
+Thunder Road Burnout (rock/intense) - Score: 0.63
+  Because: energy 0.89 is close to target 0.95 (+3.7 of 4.0); valence 0.52 is close to target 0.50 (+1.0 of 1.0)
+Broken Amp (rock/angry) - Score: 0.61
+  Because: energy 0.94 is close to target 0.95 (+4.0 of 4.0); valence 0.30 is close to target 0.50 (+0.6 of 1.0)
+Iron Tide (metal/angry) - Score: 0.59
+  Because: energy 0.97 is close to target 0.95 (+4.0 of 4.0)
+Gym Hero (pop/intense) - Score: 0.58
+  Because: energy 0.93 is close to target 0.95 (+4.0 of 4.0)
+```
+
+### Unknown Genre/Mood
+
+```text
+Velvet Hours (r&b/romantic) - Score: 0.70
+  Because: energy 0.49 is close to target 0.50 (+4.0 of 4.0); valence 0.64 is close to target 0.50 (+0.8 of 1.0); acousticness 0.38 is close to target 0.50 (+0.4 of 0.5)
+Smoky Corner Trio (jazz/moody) - Score: 0.68
+  Because: energy 0.46 is close to target 0.50 (+3.9 of 4.0); valence 0.52 is close to target 0.50 (+1.0 of 1.0)
+Dusty Porch Light (country/nostalgic) - Score: 0.66
+  Because: energy 0.52 is close to target 0.50 (+4.0 of 4.0); valence 0.68 is close to target 0.50 (+0.7 of 1.0); acousticness 0.74 is close to target 0.50 (+0.3 of 0.5)
+Late Night Notes (lofi/focused) - Score: 0.65
+  Because: energy 0.43 is close to target 0.50 (+3.6 of 4.0); valence 0.55 is close to target 0.50 (+1.0 of 1.0); acousticness 0.74 is close to target 0.50 (+0.3 of 0.5)
+Midnight Coding (lofi/chill) - Score: 0.64
+  Because: energy 0.42 is close to target 0.50 (+3.5 of 4.0); valence 0.56 is close to target 0.50 (+1.0 of 1.0); acousticness 0.71 is close to target 0.50 (+0.4 of 0.5)
+```
+
+### Out-of-Range Targets
+
+```text
+Neon Pulse Festival (edm/euphoric) - Score: 0.27
+  Because: genre match (edm) (+0.5); mood match (euphoric) (+1.5)
+Nocturne in Rain (classical/melancholic) - Score: 0.00
+  Because: No close matches
+Iron Tide (metal/angry) - Score: 0.00
+  Because: No close matches
+Broken Amp (rock/angry) - Score: 0.00
+  Because: No close matches
+Gym Hero (pop/intense) - Score: 0.00
+  Because: No close matches
+```
+
+### Empty Profile
+
+```text
+Sunrise City (pop/happy) - Score: 0.00
+  Because: No close matches
+Midnight Coding (lofi/chill) - Score: 0.00
+  Because: No close matches
+Storm Runner (rock/intense) - Score: 0.00
+  Because: No close matches
+Library Rain (lofi/chill) - Score: 0.00
+  Because: No close matches
+Gym Hero (pop/intense) - Score: 0.00
+  Because: No close matches
+```
 
 ---
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
+**Weight shift: energy 2.0 → 4.0, genre 1.0 → 0.5.** The final score is still `sum(weight * similarity) / sum(weights)`, now with a total weight of 7.5 instead of 6.0. Every similarity is between 0 and 1, so every score still falls between 0 and 1. I checked this across all 9 profiles and all songs (min 0.00, max 0.99), and a perfect match scores exactly 1.0. The tests still pass. Effects:
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+- The standard profiles keep the same #1 song. In Deep Intense Rock, Gym Hero (pop/intense) now beats Broken Amp (rock/angry) for #3, and Highway Anthem drops out of the top 5.
+- Genre loyalty weakens. In Sad but Hyper, the pop songs leave the top 5 and high-energy rock and metal take over.
+- Loud Unplugged flips. Willow Letters, which matched genre and mood but not energy, falls out, and high-energy rock wins. Energy now beats everything else.
+- Scores for sparse profiles rise (Unknown Genre/Mood goes from about 0.5 to about 0.7), because energy dominates the average. A middling top score is now a weaker sign that nothing matched.
 
 ---
 
