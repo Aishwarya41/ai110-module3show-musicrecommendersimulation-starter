@@ -2,86 +2,102 @@
 
 ## 1. Model Name  
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
+**VibeFinder 1.0**
 
 ---
 
-## 2. Intended Use  
+## 2. Goal / Task and Intended Use  
 
-Describe what your recommender is designed to do and who it is for. 
+**Goal.** The model suggests songs a listener might like. It picks 5 songs from a small catalog. It also says why it picked each one.
 
-Prompts:  
+**Who it is for.** It is for classroom learning. It shows how a simple recommender works.
 
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+**What it assumes.** The listener tells us what they like. They give a favorite genre, a favorite mood, and target numbers. The model does not learn from listening history.
 
----
+**Intended use.**
+- Learning how scoring and ranking work.
+- Testing how profiles change the results.
+- Explaining why a song was picked.
 
-## 3. How the Model Works  
-
-The recommender works like a judge scoring every song in the catalog against what one listener says they like. It does not learn from listening history. It only compares a song's description to the listener's stated taste.
-
-**What it looks at.** Each song is described by its genre (such as lofi or rock), its mood (such as chill or intense), and three numbers between 0 and 1: energy (calm to intense), valence (sad to cheerful), and acousticness (electronic to acoustic). The listener tells the system a favorite genre and mood, a target energy, and whether they like acoustic music. They can also give a target valence.
-
-**How a song earns points.** Each feature is worth a different number of points, and the system adds them up:
-
-- **Energy** is worth the most, up to 2 points.
-- **Mood** is worth up to 1.5 points.
-- **Genre** is worth up to 1 point.
-- **Valence** is worth up to 1 point.
-- **Acousticness** is worth up to half a point.
-
-Genre and mood are all-or-nothing. A song gets the full points if its label matches the listener's favorite, and nothing if it doesn't. The three numbers work differently. The system rewards a song for being *close* to the listener's target, not for being higher or lower. A song with energy 0.38 earns nearly full points for a listener who wants 0.40, and a song at 0.90 earns almost none. A song that is too intense is penalized as much as one that is too mellow.
-
-**Turning points into a score.** The points are added up and divided by the most a song could earn, so every song gets a score between 0 and 1. A score near 1 means the song is close to the listener's taste on every feature.
-
-**Choosing what to recommend.** The system scores every song, sorts them from highest to lowest, and shows the top five. Each recommendation comes with a plain-language explanation listing which features earned points, for example "mood match (chill) (+1.5)", so the listener can see why a song was picked.
-
-**Why energy and mood count more than genre.** Genre is a broad label, and the catalog has only 28 songs, mostly one or two per genre. If genre counted for the most, the top results would be just the songs with the right genre label, whatever they sound like. Giving more weight to energy and mood lets a song from another genre rank high when it matches how the listener wants to feel.
-
-**Changes from the starter logic.**
-
-- Genre counts for less than mood and energy. The common starting point gave genre the largest weight.
-- Valence and acousticness are included, so the system looks at more than genre, mood and energy.
-- Energy and the other numbers are scored by closeness to a target instead of "higher is better."
-- Every recommendation shows its reasons along with the points each feature earned.
+**Not intended for.**
+- Real music apps with real users.
+- Deciding what artists get heard or paid.
+- Mood or health advice, like picking music for someone who is sad.
+- Large catalogs. It was only tried on 28 songs.
 
 ---
 
-## 4. Data  
+## 3. Algorithm Summary  
 
-Describe the dataset the model uses.  
+The model gives every song a score from 0 to 1. A higher score means a better fit.
 
-Prompts:  
+Each song earns points for five things:
 
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
+| Feature | Max points | How it earns them |
+|---|---|---|
+| Energy | 4.0 | Closer to the target is better |
+| Mood | 1.5 | Full points if it matches, else none |
+| Valence (cheerfulness) | 1.0 | Closer to the target is better |
+| Genre | 0.5 | Full points if it matches, else none |
+| Acousticness | 0.5 | Closer to the target is better |
+
+- Genre and mood are all or nothing.
+- Energy, valence, and acousticness are about being close. A song that is too loud is penalized like one that is too quiet.
+- The model adds up the points. It divides by the most a song could earn. That keeps every score between 0 and 1.
+- If the listener skips a feature, it is left out.
+- Then it sorts the songs and shows the top 5. Each one has a short reason.
+
+**Why energy counts most.** Energy says how a song feels. Genre is just a label. The catalog is small, so a heavy genre weight would hide good songs from other genres.
+
+**One change I made.** I doubled the energy weight (2.0 to 4.0). I halved the genre weight (1.0 to 0.5). Scores stayed between 0 and 1. The tests still passed.
+
+---
+
+## 4. Data Used  
+
+- The catalog has **28 songs** in a CSV file.
+- Each song has a genre, a mood, and numbers for energy, tempo, valence, danceability, and acousticness.
+- There are **15 genres**. Lofi has 6 songs. Rock has 4. Nine genres have only 1 song.
+- There are **16 moods**. Chill is the most common, with 4 songs.
+- The model uses genre, mood, energy, valence, and acousticness. It ignores tempo and danceability.
+
+**Limits.**
+- The catalog is tiny.
+- Only one song has energy below 0.2.
+- There is no "sad" mood.
+- Nothing about lyrics, language, artists, or culture.
+- I did not add or remove songs.
 
 ---
 
 ## 5. Strengths  
 
-Where does your system seem to work well  
-
-Prompts:  
-
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
+- It works well for clear listeners. Chill Lofi, High-Energy Pop, and Deep Intense Rock all got sensible lists.
+- Calm listeners and intense listeners get totally different songs.
+- Every pick comes with a reason. That makes it easy to check.
+- Scoring by closeness works better than "higher is better."
+- The top picks matched my own sense of what fits.
 
 ---
 
-## 6. Limitations and Bias 
+## 6. Observed Behavior / Biases and Limitations  
 
-**Weakness: very-low-energy listeners are poorly served, and the high energy weight hides it.** Only 1 of the 28 songs has energy below 0.2 (Nocturne in Rain, 0.18), so for a listener who wants energy 0.0 the best song reaches only 0.49 energy similarity and no song reaches 0.6. Energy carries 4.0 of the 7.5 total weight, so those users cannot make up the loss with mood or genre, and their best possible score without a label match is about 0.71, against 0.94 to 0.95 for mid- or high-energy listeners. Because the system always returns five confident-looking results, a sleep or meditation listener sees a list of mediocre matches with no warning that the catalog has almost nothing for them. The same effect pushes mid-energy songs like Spacewalk Thoughts and Willow Letters into many more top-5 lists (450 and 417 of 1,200 test profiles) than extreme songs like Iron Tide (30).
+**Biggest weakness: very-low-energy listeners are poorly served, and the high energy weight hides it.** Only 1 of the 28 songs has energy below 0.2 (Nocturne in Rain, 0.18), so for a listener who wants energy 0.0 the best song reaches only 0.49 energy similarity and no song reaches 0.6. Energy carries 4.0 of the 7.5 total weight, so those users cannot make up the loss with mood or genre, and their best possible score without a label match is about 0.71, against 0.94 to 0.95 for mid- or high-energy listeners. Because the system always returns five confident-looking results, a sleep or meditation listener sees a list of mediocre matches with no warning that the catalog has almost nothing for them. The same effect pushes mid-energy songs like Spacewalk Thoughts and Willow Letters into many more top-5 lists (450 and 417 of 1,200 test profiles) than extreme songs like Iron Tide (30).
+
+**Other patterns I saw.**
+- **Gym Hero shows up too much.** It is a loud pop song. It appeared in the top 5 for 7 of 9 profiles.
+- **Energy beats everything.** A song with the right energy can win over one with the right genre.
+- **Unknown moods count for nothing.** Nobody can get mood points for "sad."
+- **Labels are all or nothing.** "Chill" gets no credit for "relaxed." "Indie pop" gets no credit for "pop."
+- **Lofi is over-represented.** Lofi fans get a full list. Reggae fans get one song.
+- **No warning for bad matches.** The model shows 5 songs even when the scores are 0.00.
+- **One target per feature.** A listener who likes both very calm and very loud music cannot say so.
 
 ---
 
 ## 7. Evaluation  
+
+**Short summary.** I tested nine listener profiles. Three were normal. Six were tricky. I read the top 5 songs for each. I also changed the weights and ran the tests again. Below are the details.
 
 I ran nine listener profiles through the recommender and read the top 5 songs for each. Three are ordinary listeners and six are "tricky" ones built to confuse the scoring.
 
@@ -123,25 +139,26 @@ I ran nine listener profiles through the recommender and read the top 5 songs fo
 
 ---
 
-## 8. Future Work  
+## 8. Ideas for Improvement  
 
-Ideas for how you would improve the model next.  
-
-Prompts:  
-
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
+1. **Add a "no good match" warning.** Say so when the top score is low.
+2. **Add mood similarity.** Let "sad" partly match "melancholic" and "wistful." Do the same for close genres.
+3. **Mix up the top 5.** Limit how many songs come from one genre, and add more low-energy and rare-genre songs.
 
 ---
 
 ## 9. Personal Reflection  
 
-A few sentences about your experience.  
+**Biggest learning moment.**  
+When I doubled energy and halved genre, the same code gave different "taste." Songs moved in and out of the top 5, and a folk fan started getting rock. I had thought of the score as math. Now I see it as a set of choices about what matters. The tricky profiles taught me more than the normal ones. They showed where the model quietly breaks, like the "sad" mood that no song has.
 
-Prompts:  
+**How AI helped, and when I double-checked it.** 
+AI helped me write the profiles, run all of them, and give feedback on my plan and design. But I could not trust it blindly. After the weight change, I checked that scores stayed between 0 and 1 and that the tests passed. I also found that the AI had miscounted the genres. It said 8 genres had one song. The real number was 9. I fixed it. That small mistake reminded me to check every number that goes into a report. The AI is good at drafting. I still have to confirm the facts.
 
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+**What surprised me.** 
+A few simple rules felt like real recommendations. Chill Lofi gave calm study songs, and the reasons next to each song made it feel like it understood me. But it does not understand anything. It just adds up points. The Gym Hero result showed this best. It kept appearing for people who wanted happy pop, because it is loud and poppy. That looks like a "taste" pattern, but it is really just one song that scores well on the heaviest feature.
+
+**What I would try next.**
+- Add a warning when no song is a good match.
+- Let similar moods and genres share credit, so "sad" can match "melancholic."
+- Limit how many songs from one genre can show up, and add more low-energy songs.
