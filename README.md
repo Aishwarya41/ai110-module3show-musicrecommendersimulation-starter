@@ -70,7 +70,7 @@ pip install -r requirements.txt
 3. Run the app:
 
 ```bash
-python -m src.main
+python3 -m src.main
 ```
 
 ### Running Tests
@@ -87,15 +87,25 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+Output of `python3 -m src.main` for a late-night study listener (genre=lofi, mood=chill, energy=0.40, valence=0.60, acousticness=0.75):
 
-```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
+```text
+Top recommendations:
+
+Rainy Window Beats - Score: 0.99
+Because: genre match (lofi) (+1.0); mood match (chill) (+1.5); energy 0.38 is close to target 0.40 (+2.0 of 2.0); valence 0.58 is close to target 0.60 (+1.0 of 1.0); acousticness 0.82 is close to target 0.75 (+0.5 of 0.5)
+
+Midnight Coding - Score: 0.99
+Because: genre match (lofi) (+1.0); mood match (chill) (+1.5); energy 0.42 is close to target 0.40 (+2.0 of 2.0); valence 0.56 is close to target 0.60 (+1.0 of 1.0); acousticness 0.71 is close to target 0.75 (+0.5 of 0.5)
+
+Library Rain - Score: 0.97
+Because: genre match (lofi) (+1.0); mood match (chill) (+1.5); energy 0.35 is close to target 0.40 (+1.9 of 2.0); valence 0.60 is close to target 0.60 (+1.0 of 1.0); acousticness 0.86 is close to target 0.75 (+0.5 of 0.5)
+
+Focus Flow - Score: 0.75
+Because: genre match (lofi) (+1.0); energy 0.40 is close to target 0.40 (+2.0 of 2.0); valence 0.59 is close to target 0.60 (+1.0 of 1.0); acousticness 0.78 is close to target 0.75 (+0.5 of 0.5)
+
+Late Night Notes - Score: 0.74
+Because: genre match (lofi) (+1.0); energy 0.43 is close to target 0.40 (+2.0 of 2.0); valence 0.55 is close to target 0.60 (+1.0 of 1.0); acousticness 0.74 is close to target 0.75 (+0.5 of 0.5)
 ```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->

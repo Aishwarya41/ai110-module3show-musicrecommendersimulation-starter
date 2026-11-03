@@ -65,6 +65,7 @@ class Recommender:
 
     @staticmethod
     def _prefs(user: UserProfile) -> Dict:
+        """Convert a UserProfile into the prefs dict that score_song expects."""
         return {
             "favorite_genre": user.favorite_genre,
             "favorite_mood": user.favorite_mood,
@@ -73,6 +74,7 @@ class Recommender:
         }
 
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
+        """Return the k songs with the highest score for this user."""
         prefs = self._prefs(user)
         ranked = sorted(
             self.songs,
@@ -82,6 +84,7 @@ class Recommender:
         return ranked[:k]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
+        """Return a semicolon-separated list of why this song fits the user."""
         _, reasons = score_song(self._prefs(user), asdict(song))
         return "; ".join(reasons) if reasons else "No matching preferences"
 
@@ -110,7 +113,7 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     Required by recommend_songs() and src/main.py
 
     Returns a weighted average of per-feature similarities (0 to 1) and a
-    list of reasons. Features the user gave no preference for are skipped.
+    list of reasons, each showing the points that feature contributed. Features the user gave no preference for are skipped.
     """
     total = 0.0
     weight_sum = 0.0
@@ -123,17 +126,21 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
         weight_sum += WEIGHTS[feature]
         if song[feature] == wanted:
             total += WEIGHTS[feature]
-            reasons.append(f"{feature} matches ({wanted})")
+            reasons.append(f"{feature} match ({wanted}) (+{WEIGHTS[feature]:.1f})")
 
     for feature, pref_key in NUMERIC_TARGETS.items():
         target = user_prefs.get(pref_key)
         if target is None:
             continue
         sim = numeric_similarity(song[feature], target, SIGMAS[feature])
-        total += WEIGHTS[feature] * sim
+        points = WEIGHTS[feature] * sim
+        total += points
         weight_sum += WEIGHTS[feature]
         if sim >= 0.6:
-            reasons.append(f"{feature} {song[feature]:.2f} is close to target {target:.2f}")
+            reasons.append(
+                f"{feature} {song[feature]:.2f} is close to target {target:.2f} "
+                f"(+{points:.1f} of {WEIGHTS[feature]:.1f})"
+            )
 
     score = total / weight_sum if weight_sum else 0.0
     return score, reasons
