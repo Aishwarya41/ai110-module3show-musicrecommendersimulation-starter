@@ -11,8 +11,7 @@ Your goal is to:
 - Evaluate what your system gets right and wrong
 - Reflect on how this mirrors real world AI recommenders
 
-Replace this paragraph with your own summary of what your version does.
-
+**My version (VibeFinder 1.0)** is a small content-based recommender. It scores each of 28 songs against a listener's taste profile and returns the top 5, with a reason for each pick. The score weighs energy most, then mood, valence, genre, and acousticness.x
 ---
 
 ## How The System Works
