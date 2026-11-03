@@ -239,15 +239,14 @@ Gym Hero (pop/intense) - Score: 0.00
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
+- **Tiny catalog.** It only has 28 songs. Nine of the 15 genres have a single song, and lofi has 6.
+- **Thin at the extremes.** Only one song has energy below 0.2. Very calm listeners get weaker matches than everyone else.
+- **Energy dominates.** Energy carries 4.0 of the 7.5 total weight. A song with the right energy can beat one with the right genre or mood.
+- **Labels are all or nothing.** "Chill" gets no credit for "relaxed." A "sad" listener gets no mood credit, because no song is labeled "sad."
+- **No "I don't know."** It shows five confident-looking results even when every score is near 0.00, such as for empty or impossible profiles.
 
-Examples:
 
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+See the [Model Card](model_card.md) for more detail.
 
 ---
 
@@ -257,10 +256,9 @@ Read and complete `model_card.md`:
 
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+**How recommenders turn data into predictions.** My recommender does not learn anything. It scores every song by how close it is to what the listener says they want, adds up weighted points, and sorts the results. That is enough to feel like a real recommendation, especially because each song comes with a reason. But the weights are choices. When I doubled the weight on energy and halved the weight on genre, the same listener got different songs. A "prediction" is really a set of opinions about what matters, written as numbers.
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
+**Where bias and unfairness can show up.** The bias came from the catalog and the labels, not only from the formula. Only one song has energy below 0.2, so very calm listeners get weaker matches than everyone else. Songs near mid-energy appear in far more top-5 lists than extreme ones, and lofi has 6 songs while nine genres have only one. Moods are exact labels, so a "sad" listener gets no mood credit when no song is labeled "sad." Worst of all, the system still shows five confident-looking results when nothing fits. In a real app, those gaps would quietly give some users worse recommendations and some artists less exposure, and no one would see it happen.
 
 
 
