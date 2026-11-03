@@ -9,3 +9,21 @@ id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
 8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
 9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
 10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
+11,Concrete Crown,Ivory Cipher,hip hop,confident,0.78,96,0.62,0.89,0.12
+12,Nocturne in Rain,Clara Vance,classical,melancholic,0.18,66,0.22,0.24,0.97
+13,Dusty Porch Light,Hollow Creek,country,nostalgic,0.52,102,0.68,0.61,0.74
+14,Island Drift,Dub Harbor,reggae,laid-back,0.58,84,0.83,0.80,0.42
+15,Iron Tide,Black Lantern,metal,angry,0.97,168,0.25,0.45,0.03
+16,Velvet Hours,Mina Voss,r&b,romantic,0.49,92,0.64,0.72,0.38
+17,Neon Pulse Festival,Arc Nova,edm,euphoric,0.95,128,0.88,0.91,0.04
+18,Willow Letters,Fern & Ash,folk,wistful,0.30,88,0.40,0.46,0.91
+19,Thunder Road Burnout,Voltline,rock,intense,0.89,148,0.52,0.63,0.12
+20,Broken Amp,Static Verse,rock,angry,0.94,160,0.30,0.58,0.07
+21,Highway Anthem,Dust & Diesel,rock,energetic,0.85,140,0.72,0.70,0.15
+22,Rainy Window Beats,LoRoom,lofi,chill,0.38,75,0.58,0.60,0.82
+23,Late Night Notes,Paper Lanterns,lofi,focused,0.43,82,0.55,0.63,0.74
+24,Slow Tea,Moss Garden,lofi,relaxed,0.33,70,0.63,0.55,0.84
+25,Tidal Meditation,Orbit Bloom,ambient,peaceful,0.22,58,0.60,0.35,0.95
+26,Smoky Corner Trio,Slow Stereo,jazz,moody,0.46,98,0.52,0.58,0.80
+27,Gloss Pop Heart,Neon Echo,pop,happy,0.80,120,0.86,0.81,0.20
+28,Grid Runner,Neon Echo,synthwave,energetic,0.80,118,0.57,0.76,0.18
